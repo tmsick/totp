@@ -15,10 +15,10 @@ import (
 )
 
 const (
-	MinDigits     = 6
-	MinPeriod     = 1
-	DefaultDigits = 6
-	DefaultPeriod = 30
+	minDigits     = 6
+	minPeriod     = 1
+	defaultDigits = 6
+	defaultPeriod = 30
 )
 
 type Token struct {
@@ -50,8 +50,8 @@ func NewToken(uri string) (token Token, err error) {
 
 	// Set default values
 	token.Algorithm = sha1.New
-	token.Digits = DefaultDigits
-	token.Period = DefaultPeriod
+	token.Digits = defaultDigits
+	token.Period = defaultPeriod
 
 	for key, values := range u.Query() {
 		for _, value := range values {
@@ -82,8 +82,8 @@ func NewToken(uri string) (token Token, err error) {
 					err = fmt.Errorf("got invalid digits. %q cannot be converted into an integer", value)
 					return
 				}
-				if digits < MinDigits {
-					err = fmt.Errorf("digits must be greater than or equal to %v. got %v", MinDigits, digits)
+				if digits < minDigits {
+					err = fmt.Errorf("digits must be greater than or equal to %v. got %v", minDigits, digits)
 					return
 				}
 				token.Digits = digits
@@ -93,8 +93,8 @@ func NewToken(uri string) (token Token, err error) {
 					err = fmt.Errorf("got invalid period. %q cannot be converted into an integer", value)
 					return
 				}
-				if period < MinPeriod {
-					err = fmt.Errorf("period must be greater than or equal to %v. got %v", MinPeriod, period)
+				if period < minPeriod {
+					err = fmt.Errorf("period must be greater than or equal to %v. got %v", minPeriod, period)
 					return
 				}
 				token.Period = period
