@@ -15,8 +15,10 @@ import (
 )
 
 const (
-	MinDigits = 6
-	MinPeriod = 1
+	MinDigits     = 6
+	MinPeriod     = 1
+	DefaultDigits = 6
+	DefaultPeriod = 30
 )
 
 type Token struct {
@@ -48,8 +50,8 @@ func NewToken(uri string) (token Token, err error) {
 
 	// Set default values
 	token.Algorithm = sha1.New
-	token.Digits = 6
-	token.Period = 30
+	token.Digits = DefaultDigits
+	token.Period = DefaultPeriod
 
 	for key, values := range u.Query() {
 		for _, value := range values {
