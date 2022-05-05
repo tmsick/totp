@@ -3,6 +3,7 @@ package totp
 import (
 	"encoding/base32"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 )
@@ -16,6 +17,11 @@ func TestNewToken(t *testing.T) {
 		{
 			// omits all optional parameters
 			uri: fmt.Sprintf("otpauth://totp/exampleuser?secret=%v", secret),
+			ok:  true,
+		},
+		{
+			// lower-case "secret" is also allowed
+			uri: fmt.Sprintf("otpauth://totp/exampleuser?secret=%v", strings.ToLower(secret)),
 			ok:  true,
 		},
 		{

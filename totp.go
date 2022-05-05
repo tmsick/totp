@@ -11,6 +11,7 @@ import (
 	"hash"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -57,7 +58,7 @@ func NewToken(uri string) (token Token, err error) {
 		for _, value := range values {
 			switch key {
 			case "secret":
-				token.Secret, err = base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(value)
+				token.Secret, err = base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(strings.ToUpper(value))
 				if err != nil {
 					err = fmt.Errorf("got invalid secret. %q cannot be decoded as a base32 string", value)
 					return
