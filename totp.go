@@ -126,10 +126,10 @@ func hotp(msg []byte, secret []byte, algorithm func() hash.Hash, digits int) str
 	mac := h.Sum(nil)
 	i := int(mac[len(mac)-1]) & 0x0f
 	n := 0
-	n += int(mac[i+0]&0x7f) << 0o30
-	n += int(mac[i+1]&0xff) << 0o20
-	n += int(mac[i+2]&0xff) << 0o10
-	n += int(mac[i+3]&0xff) << 0o00
+	n += int(mac[i+0]) & 0x7f << 0o30
+	n += int(mac[i+1]) & 0xff << 0o20
+	n += int(mac[i+2]) & 0xff << 0o10
+	n += int(mac[i+3]) & 0xff << 0o00
 	s := strconv.Itoa(n)
 	for len(s) > digits {
 		s = s[1:]
