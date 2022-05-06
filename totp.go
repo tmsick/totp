@@ -149,9 +149,9 @@ func (t *Token) Period() int {
 	return t.period
 }
 
-func (token Token) Generate(t time.Time) string {
+func (tk *Token) Generate(t time.Time) string {
 	// `token.period` is guaranteed to be positive.
-	u := t.Unix() / int64(token.period)
+	u := t.Unix() / int64(tk.period)
 
 	// According to RFC 4226 (p.5), `msg` is a 8-byte-long bytearray.
 	//
@@ -170,7 +170,7 @@ func (token Token) Generate(t time.Time) string {
 	msg[6] = byte((u & 0x_00_00_00_00_00_00_ff_00) >> 0o10)
 	msg[7] = byte((u & 0x_00_00_00_00_00_00_00_ff) >> 0o00)
 
-	return hotp(msg, token.secret, token.algorithm.proc, token.digits)
+	return hotp(msg, tk.secret, tk.algorithm.proc, tk.digits)
 }
 
 func hotp(msg []byte, secret []byte, algorithm func() hash.Hash, digits int) string {
