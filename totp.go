@@ -6,7 +6,6 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/base32"
-	"errors"
 	"fmt"
 	"hash"
 	"net/url"
@@ -36,40 +35,34 @@ type Token struct {
 	period    int
 }
 
-func NewToken(uri string) (token *Token, err error) {
-	token = nil
-
+func NewToken(uri string) (*Token, error) {
 	u, err := url.Parse(uri)
 	if err != nil {
-		return
+		return nil, fmt.Errorf("failed to parse uri: %q", uri)
 	}
 	if u.Scheme != "otpauth" {
-		err = errors.New("scheme must be `otpauth'")
-		return
+		return nil, fmt.Errorf("scheme must be \"otpauth\". uri: %q", uri)
 	}
 	if u.Host != "totp" {
-		err = errors.New("host must be `totp'")
-		return
+		return nil, fmt.Errorf("host must be \"totp\". uri: %q", uri)
 	}
 	if !u.Query().Has("secret") {
-		err = errors.New("uri must have secret in query")
-		return
+		return nil, fmt.Errorf("uri must have secret in query. uri: %q", uri)
 	}
 
-	token = &Token{
+	// Init &Token
+	token := &Token{
 		algorithm: defaultAlgorithm,
 		digits:    defaultDigits,
 		period:    defaultPeriod,
 	}
-
 	for key, values := range u.Query() {
 		for _, value := range values {
 			switch key {
 			case "secret":
 				token.secret, err = base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(strings.ToUpper(value))
 				if err != nil {
-					err = fmt.Errorf("got invalid secret. %q cannot be decoded as a base32 string", value)
-					return
+					return nil, fmt.Errorf("got invalid secret. %q cannot be decoded as a base32 string", value)
 				}
 			case "issuer":
 				token.issuer = value
@@ -82,35 +75,30 @@ func NewToken(uri string) (token *Token, err error) {
 				case "SHA512":
 					token.algorithm = sha512.New
 				default:
-					err = errors.New("got invalid algorithm. valid values are: SHA1, SHA256, and SHA512")
-					return
+					return nil, fmt.Errorf("got invalid algorithm %q. valid values are: SHA1, SHA256, and SHA512", value)
 				}
 			case "digits":
 				digits, _err := strconv.Atoi(value)
 				if _err != nil {
-					err = fmt.Errorf("got invalid digits. %q cannot be converted into an integer", value)
-					return
+					return nil, fmt.Errorf("got invalid digits. %q cannot be converted into an integer", value)
 				}
 				if digits < minDigits || digits > maxDigits {
-					err = fmt.Errorf("digits must be in the range of [%v, %v]. got %v", minDigits, maxDigits, digits)
-					return
+					return nil, fmt.Errorf("digits must be in the range of [%v, %v]. got %v", minDigits, maxDigits, digits)
 				}
 				token.digits = digits
 			case "period":
 				period, _err := strconv.Atoi(value)
 				if _err != nil {
-					err = fmt.Errorf("got invalid period. %q cannot be converted into an integer", value)
-					return
+					return nil, fmt.Errorf("got invalid period. %q cannot be converted into an integer", value)
 				}
 				if period < minPeriod {
-					err = fmt.Errorf("period must be greater than or equal to %v. got %v", minPeriod, period)
-					return
+					return nil, fmt.Errorf("period must be greater than or equal to %v. got %v", minPeriod, period)
 				}
 				token.period = period
 			}
 		}
 	}
-	return
+	return token, nil
 }
 
 func (token Token) Generate(t time.Time) string {
