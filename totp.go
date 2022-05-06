@@ -36,7 +36,9 @@ type Token struct {
 	period    int
 }
 
-func NewToken(uri string) (token Token, err error) {
+func NewToken(uri string) (token *Token, err error) {
+	token = nil
+
 	u, err := url.Parse(uri)
 	if err != nil {
 		return
@@ -54,10 +56,11 @@ func NewToken(uri string) (token Token, err error) {
 		return
 	}
 
-	// Set default values
-	token.algorithm = defaultAlgorithm
-	token.digits = defaultDigits
-	token.period = defaultPeriod
+	token = &Token{
+		algorithm: defaultAlgorithm,
+		digits:    defaultDigits,
+		period:    defaultPeriod,
+	}
 
 	for key, values := range u.Query() {
 		for _, value := range values {
