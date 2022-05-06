@@ -65,8 +65,18 @@ func TestNewToken(t *testing.T) {
 			ok:  true,
 		},
 		{
+			// "digits" is specified to be the biggest value available
+			uri: fmt.Sprintf("otpauth://totp/exampleuser?secret=%v&digits=10", secret),
+			ok:  true,
+		},
+		{
 			// "digits" is too small
 			uri: fmt.Sprintf("otpauth://totp/exampleuser?secret=%v&digits=5", secret),
+			ok:  false,
+		},
+		{
+			// "digits" is too big
+			uri: fmt.Sprintf("otpauth://totp/exampleuser?secret=%v&digits=11", secret),
 			ok:  false,
 		},
 		{

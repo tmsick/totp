@@ -17,6 +17,7 @@ import (
 
 const (
 	minDigits     = 6
+	maxDigits     = 10
 	minPeriod     = 1
 	defaultDigits = 6
 	defaultPeriod = 30
@@ -83,8 +84,8 @@ func NewToken(uri string) (token Token, err error) {
 					err = fmt.Errorf("got invalid digits. %q cannot be converted into an integer", value)
 					return
 				}
-				if digits < minDigits {
-					err = fmt.Errorf("digits must be greater than or equal to %v. got %v", minDigits, digits)
+				if digits < minDigits || digits > maxDigits {
+					err = fmt.Errorf("digits must be in the range of [%v, %v]. got %v", minDigits, maxDigits, digits)
 					return
 				}
 				token.digits = digits
