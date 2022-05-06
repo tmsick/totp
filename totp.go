@@ -129,6 +129,26 @@ func NewToken(uri string) (*Token, error) {
 	return t, nil
 }
 
+func (t *Token) Label() string {
+	return t.label
+}
+
+func (t *Token) Issuer() string {
+	return t.issuer
+}
+
+func (t *Token) Algorithm() string {
+	return t.algorithm.name
+}
+
+func (t *Token) Digits() int {
+	return t.digits
+}
+
+func (t *Token) Period() int {
+	return t.period
+}
+
 func (token Token) Generate(t time.Time) string {
 	// `token.period` is guaranteed to be positive.
 	u := t.Unix() / int64(token.period)
