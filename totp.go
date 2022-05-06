@@ -24,7 +24,10 @@ const (
 	defaultPeriod = 30
 )
 
-type algorithm func() hash.Hash
+type algorithm struct {
+	name string
+	proc func() hash.Hash
+}
 
 type Token struct {
 	label     string
@@ -36,9 +39,9 @@ type Token struct {
 }
 
 var (
-	algorithmSHA1    algorithm = sha1.New
-	algorithmSHA256  algorithm = sha256.New
-	algorithmSHA512  algorithm = sha512.New
+	algorithmSHA1    algorithm = algorithm{"SHA1", sha1.New}
+	algorithmSHA256  algorithm = algorithm{"SHA256", sha256.New}
+	algorithmSHA512  algorithm = algorithm{"SHA512", sha512.New}
 	algorithmDefault algorithm = algorithmSHA1
 )
 
@@ -147,7 +150,7 @@ func (token Token) Generate(t time.Time) string {
 	msg[6] = byte((u & 0x_00_00_00_00_00_00_ff_00) >> 0o10)
 	msg[7] = byte((u & 0x_00_00_00_00_00_00_00_ff) >> 0o00)
 
-	return hotp(msg, token.secret, token.algorithm, token.digits)
+	return hotp(msg, token.secret, token.algorithm.proc, token.digits)
 }
 
 func hotp(msg []byte, secret []byte, algorithm func() hash.Hash, digits int) string {
