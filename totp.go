@@ -61,6 +61,9 @@ func NewToken(uri string) (*Token, error) {
 		period:    defaultPeriod,
 	}
 
+	// Process label
+	token.label = u.EscapedPath()
+
 	// Process secret [REQUIRED]
 	if u.Query().Has("secret") {
 		rawSecret := u.Query().Get("secret")
