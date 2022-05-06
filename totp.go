@@ -55,14 +55,14 @@ func NewToken(uri string) (*Token, error) {
 	}
 
 	// Initialize Token
-	token := &Token{
+	t := &Token{
 		algorithm: algorithmDefault,
 		digits:    defaultDigits,
 		period:    defaultPeriod,
 	}
 
 	// Process label
-	token.label = u.EscapedPath()
+	t.label = u.EscapedPath()
 
 	// Process secret [REQUIRED]
 	if u.Query().Has("secret") {
@@ -72,14 +72,14 @@ func NewToken(uri string) (*Token, error) {
 		if err != nil {
 			return nil, fmt.Errorf("Failed to decode secret value %q as Base32 string. URI: %q", rawSecret, uri)
 		}
-		token.secret = secret
+		t.secret = secret
 	} else {
 		return nil, fmt.Errorf("Secret is required in query parameter. URI: %q", uri)
 	}
 
 	// Process issuer [OPTIONAL]
 	if u.Query().Has("issuer") {
-		token.issuer = u.Query().Get("issuer")
+		t.issuer = u.Query().Get("issuer")
 	}
 
 	// Process algorithm [OPTIONAL]
@@ -87,11 +87,11 @@ func NewToken(uri string) (*Token, error) {
 		rawAlgorithm := u.Query().Get("algorithm")
 		switch rawAlgorithm {
 		case "SHA1":
-			token.algorithm = algorithmSHA1
+			t.algorithm = algorithmSHA1
 		case "SHA256":
-			token.algorithm = algorithmSHA256
+			t.algorithm = algorithmSHA256
 		case "SHA512":
-			token.algorithm = algorithmSHA512
+			t.algorithm = algorithmSHA512
 		default:
 			return nil, fmt.Errorf("Algorithm have to be one of \"SHA1\", \"SHA256\", or \"SHA512\". Got %q. URI: %q", rawAlgorithm, uri)
 		}
@@ -107,7 +107,7 @@ func NewToken(uri string) (*Token, error) {
 		if digits < minDigits || digits > maxDigits {
 			return nil, fmt.Errorf("Digits have to be in the range of [%v, %v]. Got %v. URI: %q", minDigits, maxDigits, digits, uri)
 		}
-		token.digits = digits
+		t.digits = digits
 	}
 
 	// Process period
@@ -120,10 +120,10 @@ func NewToken(uri string) (*Token, error) {
 		if period < minPeriod || period > maxPeriod {
 			return nil, fmt.Errorf("Period have to be in the range of [%v, %v]. Got %v. URI: %q", minPeriod, maxPeriod, period, uri)
 		}
-		token.period = period
+		t.period = period
 	}
 
-	return token, nil
+	return t, nil
 }
 
 func (token Token) Generate(t time.Time) string {
