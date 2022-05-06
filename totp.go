@@ -161,14 +161,14 @@ func (tk *Token) Generate(t time.Time) string {
 	// >         MUST be synchronized between the HOTP generator (client)
 	// >         and the HOTP validator (server).
 	msg := make([]byte, 8)
-	msg[0] = byte((u & 0x_7f_00_00_00_00_00_00_00) >> 0o70)
-	msg[1] = byte((u & 0x_00_ff_00_00_00_00_00_00) >> 0o60)
-	msg[2] = byte((u & 0x_00_00_ff_00_00_00_00_00) >> 0o50)
-	msg[3] = byte((u & 0x_00_00_00_ff_00_00_00_00) >> 0o40)
-	msg[4] = byte((u & 0x_00_00_00_00_ff_00_00_00) >> 0o30)
-	msg[5] = byte((u & 0x_00_00_00_00_00_ff_00_00) >> 0o20)
-	msg[6] = byte((u & 0x_00_00_00_00_00_00_ff_00) >> 0o10)
-	msg[7] = byte((u & 0x_00_00_00_00_00_00_00_ff) >> 0o00)
+	msg[0] = byte(u & 0x_7f_00_00_00_00_00_00_00 >> 0o70)
+	msg[1] = byte(u & 0x_00_ff_00_00_00_00_00_00 >> 0o60)
+	msg[2] = byte(u & 0x_00_00_ff_00_00_00_00_00 >> 0o50)
+	msg[3] = byte(u & 0x_00_00_00_ff_00_00_00_00 >> 0o40)
+	msg[4] = byte(u & 0x_00_00_00_00_ff_00_00_00 >> 0o30)
+	msg[5] = byte(u & 0x_00_00_00_00_00_ff_00_00 >> 0o20)
+	msg[6] = byte(u & 0x_00_00_00_00_00_00_ff_00 >> 0o10)
+	msg[7] = byte(u & 0x_00_00_00_00_00_00_00_ff >> 0o00)
 
 	return hotp(msg, tk.secret, tk.algorithm.proc, tk.digits)
 }
