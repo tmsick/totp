@@ -23,12 +23,12 @@ const (
 )
 
 type Token struct {
-	Label     string
-	Secret    []byte
-	Issuer    string
-	Algorithm func() hash.Hash
-	Digits    int
-	Period    int
+	label     string
+	secret    []byte
+	issuer    string
+	algorithm func() hash.Hash
+	digits    int
+	period    int
 }
 
 func NewToken(uri string) (token Token, err error) {
@@ -50,29 +50,29 @@ func NewToken(uri string) (token Token, err error) {
 	}
 
 	// Set default values
-	token.Algorithm = sha1.New
-	token.Digits = defaultDigits
-	token.Period = defaultPeriod
+	token.algorithm = sha1.New
+	token.digits = defaultDigits
+	token.period = defaultPeriod
 
 	for key, values := range u.Query() {
 		for _, value := range values {
 			switch key {
 			case "secret":
-				token.Secret, err = base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(strings.ToUpper(value))
+				token.secret, err = base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(strings.ToUpper(value))
 				if err != nil {
 					err = fmt.Errorf("got invalid secret. %q cannot be decoded as a base32 string", value)
 					return
 				}
 			case "issuer":
-				token.Issuer = value
+				token.issuer = value
 			case "algorithm":
 				switch value {
 				case "SHA1":
-					token.Algorithm = sha1.New
+					token.algorithm = sha1.New
 				case "SHA256":
-					token.Algorithm = sha256.New
+					token.algorithm = sha256.New
 				case "SHA512":
-					token.Algorithm = sha512.New
+					token.algorithm = sha512.New
 				default:
 					err = errors.New("got invalid algorithm. valid values are: SHA1, SHA256, and SHA512")
 					return
@@ -87,7 +87,7 @@ func NewToken(uri string) (token Token, err error) {
 					err = fmt.Errorf("digits must be greater than or equal to %v. got %v", minDigits, digits)
 					return
 				}
-				token.Digits = digits
+				token.digits = digits
 			case "period":
 				period, _err := strconv.Atoi(value)
 				if _err != nil {
@@ -98,7 +98,7 @@ func NewToken(uri string) (token Token, err error) {
 					err = fmt.Errorf("period must be greater than or equal to %v. got %v", minPeriod, period)
 					return
 				}
-				token.Period = period
+				token.period = period
 			}
 		}
 	}
@@ -106,7 +106,7 @@ func NewToken(uri string) (token Token, err error) {
 }
 
 func (token Token) Generate(t time.Time) string {
-	u := t.Unix() / int64(token.Period)
+	u := t.Unix() / int64(token.period)
 	// Message is eight-byte long byte array as determined in the spec
 	msg := make([]byte, 8)
 	msg[0] = byte((u & 0x_7f_00_00_00_00_00_00_00) >> 0o70)
@@ -117,7 +117,7 @@ func (token Token) Generate(t time.Time) string {
 	msg[5] = byte((u & 0x_00_00_00_00_00_ff_00_00) >> 0o20)
 	msg[6] = byte((u & 0x_00_00_00_00_00_00_ff_00) >> 0o10)
 	msg[7] = byte((u & 0x_00_00_00_00_00_00_00_ff) >> 0o00)
-	return hotp(msg, token.Secret, token.Algorithm, token.Digits)
+	return hotp(msg, token.secret, token.algorithm, token.digits)
 }
 
 func hotp(msg []byte, secret []byte, algorithm func() hash.Hash, digits int) string {
