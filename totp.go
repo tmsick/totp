@@ -8,6 +8,7 @@ import (
 	"encoding/base32"
 	"fmt"
 	"hash"
+	"math"
 	"net/url"
 	"strconv"
 	"strings"
@@ -126,12 +127,9 @@ func hotp(msg []byte, secret []byte, algorithm func() hash.Hash, digits int) str
 	n += int(mac[i+1]) & 0xff << 0o20
 	n += int(mac[i+2]) & 0xff << 0o10
 	n += int(mac[i+3]) & 0xff << 0o00
-	s := strconv.Itoa(n)
-	for len(s) > digits {
-		s = s[1:]
-	}
-	for len(s) < digits {
-		s = "0" + s
-	}
-	return s
+	// Digits is guaranteed to be in the range of [minDigits, maxDigits]
+	n %= int(math.Pow10(digits))
+	// Prepare template string like "%06d"
+	tpl := fmt.Sprintf("%%0%dd", digits)
+	return fmt.Sprintf(tpl, n)
 }
