@@ -23,6 +23,10 @@ const (
 	defaultPeriod = 30
 )
 
+var (
+	defaultAlgorithm = sha1.New
+)
+
 type Token struct {
 	label     string
 	secret    []byte
@@ -51,7 +55,7 @@ func NewToken(uri string) (token Token, err error) {
 	}
 
 	// Set default values
-	token.algorithm = sha1.New
+	token.algorithm = defaultAlgorithm
 	token.digits = defaultDigits
 	token.period = defaultPeriod
 
