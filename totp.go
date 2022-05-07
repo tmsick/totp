@@ -29,6 +29,7 @@ type algorithm struct {
 	proc func() hash.Hash
 }
 
+// A Token represents a virtual TOTP token that generates a Time-Based One-Time Password defined in RFC 6238.
 type Token struct {
 	label     string
 	secret    []byte
@@ -45,6 +46,21 @@ var (
 	algorithmDefault algorithm = algorithmSHA1
 )
 
+// NewToken returns a new virtual TOTP token with parameters specified by a Key URI.
+// The Key URI format is defined in https://github.com/google/google-authenticator/wiki/Key-Uri-Format.
+//
+// Users of this library have to specify at least `secret` in query parameter as defined in the spec.
+// Other parameters have default values like below:
+//   * issuer    = ""
+//   * algorithm = "SHA1" (Other available options are "SHA256" and "SHA512")
+//   * digits    = 6
+//   * period    = 30
+//
+// `digits` and `period` have a limited range as below:
+//   * 6 <= digits <= 10
+//   * 1 <= period <= 90
+//
+// NewToken doesn't panic and merely returns an error should there be any violation in a Key URI passed.
 func NewToken(uri string) (*Token, error) {
 	u, err := url.Parse(uri)
 	if err != nil {
@@ -65,7 +81,7 @@ func NewToken(uri string) (*Token, error) {
 	}
 
 	// Process label
-	// `u.Path` might contain preceding or trailing slashes.
+	// `u.Path` might contain leading or trailing slashes.
 	t.label = strings.Trim(u.Path, "/")
 
 	// Process secret [REQUIRED]
@@ -134,26 +150,33 @@ func NewToken(uri string) (*Token, error) {
 	return t, nil
 }
 
+// Label returns the label part of the Key URI without leading or trailing slashes.
 func (t *Token) Label() string {
 	return t.label
 }
 
+// Issuer returns the issuer value of the Key URI.
 func (t *Token) Issuer() string {
 	return t.issuer
 }
 
+// Algorithm returns the hash function name used to generate TOTPs.
+// It should return "SHA1", "SHA256", or "ShA512".
 func (t *Token) Algorithm() string {
 	return t.algorithm.name
 }
 
+// Digits returns the number of digits OTPs have.
 func (t *Token) Digits() int {
 	return t.digits
 }
 
+// Period returns the time duration in seconds a TOTP lives.
 func (t *Token) Period() int {
 	return t.period
 }
 
+// Generate returns a TOTP value calculated with the token's parameters and a specified time.
 func (t *Token) Generate(m time.Time) string {
 	// `t.period` is guaranteed to be positive.
 	u := m.Unix() / int64(t.period)
@@ -189,9 +212,8 @@ func hotp(msg []byte, secret []byte, algorithm func() hash.Hash, digits int) str
 	// Start Dynamic Truncation (DT) defined in RFC 4226 (p.7).
 	i := int(mac[len(mac)-1]) & 0x0f
 
-	// It is safe to naively access `mac[i+0]`...`mac[i+3]` because `i` is in the range of [0, 15]
-	// and `mac` has the result of HMAC-SHA1, -SHA256, or -SHA512, whose length is at least 20
-	// bytes, 32 bytes, or 64 bytes respectively.
+	// It is safe to naively access `mac[i+0]`...`mac[i+3]` because `i` is in the range of [0, 15] and `mac` has the
+	// result of HMAC-SHA1, -SHA256, or -SHA512, whose length is at least 20 bytes, 32 bytes, or 64 bytes respectively.
 	n := 0
 	n += int(mac[i+0]) & 0x7f << 0o30
 	n += int(mac[i+1]) & 0xff << 0o20
