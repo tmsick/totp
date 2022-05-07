@@ -71,6 +71,10 @@ func NewToken(uri string) (*Token, error) {
 	// Process secret [REQUIRED]
 	if u.Query().Has("secret") {
 		rawSecret := u.Query().Get("secret")
+		// Empty string is unfortunately treated as a valid Base32 string by encoding/base32.
+		if rawSecret == "" {
+			return nil, fmt.Errorf("Secret is empty. URI: %q", uri)
+		}
 		upperSecret := strings.ToUpper(rawSecret)
 		secret, err := base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(upperSecret)
 		if err != nil {
