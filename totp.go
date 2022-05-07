@@ -16,12 +16,12 @@ import (
 )
 
 const (
-	minDigits     = 6
-	maxDigits     = 10
-	defaultDigits = 6
-	minPeriod     = 1
-	maxPeriod     = 90
-	defaultPeriod = 30
+	digitsDefault = 6
+	digitsMax     = 10
+	digitsMin     = 6
+	periodDefault = 30
+	periodMax     = 90
+	periodMin     = 1
 )
 
 type algorithm struct {
@@ -76,8 +76,8 @@ func NewToken(uri string) (*Token, error) {
 	// Initialize Token
 	t := &Token{
 		algorithm: algorithmDefault,
-		digits:    defaultDigits,
-		period:    defaultPeriod,
+		digits:    digitsDefault,
+		period:    periodDefault,
 	}
 
 	// Process label
@@ -128,8 +128,8 @@ func NewToken(uri string) (*Token, error) {
 		if err != nil {
 			return nil, fmt.Errorf("Digits %q cannot be converted into an integer. URI: %q", rawDigits, uri)
 		}
-		if digits < minDigits || digits > maxDigits {
-			return nil, fmt.Errorf("Digits have to be in the range of [%v, %v]. Got %v. URI: %q", minDigits, maxDigits, digits, uri)
+		if digits < digitsMin || digits > digitsMax {
+			return nil, fmt.Errorf("Digits have to be in the range of [%v, %v]. Got %v. URI: %q", digitsMin, digitsMax, digits, uri)
 		}
 		t.digits = digits
 	}
@@ -141,8 +141,8 @@ func NewToken(uri string) (*Token, error) {
 		if err != nil {
 			return nil, fmt.Errorf("Period %q cannot be converted into an integer. URI: %q", rawPeriod, uri)
 		}
-		if period < minPeriod || period > maxPeriod {
-			return nil, fmt.Errorf("Period have to be in the range of [%v, %v]. Got %v. URI: %q", minPeriod, maxPeriod, period, uri)
+		if period < periodMin || period > periodMax {
+			return nil, fmt.Errorf("Period have to be in the range of [%v, %v]. Got %v. URI: %q", periodMin, periodMax, period, uri)
 		}
 		t.period = period
 	}
