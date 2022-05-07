@@ -181,13 +181,8 @@ func (t *Token) Generate(m time.Time) string {
 	// `t.period` is guaranteed to be positive.
 	u := m.Unix() / int64(t.period)
 
-	// According to RFC 4226 (p.5), `msg` is a 8-byte-long bytearray.
-	//
-	// > Symbol  Represents
-	// > -------------------------------------------------------------------
-	// > C       8-byte counter value, the moving factor.  This counter
-	// >         MUST be synchronized between the HOTP generator (client)
-	// >         and the HOTP validator (server).
+	// According to RFC 4226, `msg` is a 8-byte-long bytearray.
+	// https://tools.ietf.org/html/rfc4226#section-5.1
 	msg := make([]byte, 8)
 	msg[0] = byte(u & 0x_7f_00_00_00_00_00_00_00 >> 0o70)
 	msg[1] = byte(u & 0x_00_ff_00_00_00_00_00_00 >> 0o60)
@@ -209,7 +204,8 @@ func hotp(msg []byte, secret []byte, algorithm func() hash.Hash, digits int) str
 	h.Write(msg)
 	mac := h.Sum(nil)
 
-	// Start Dynamic Truncation (DT) defined in RFC 4226 (p.7).
+	// Start Dynamic Truncation (DT) defined in RFC 4226.
+	// https://tools.ietf.org/html/rfc4226#section-5.3
 	i := int(mac[len(mac)-1]) & 0x0f
 
 	// It is safe to naively access `mac[i+0]`...`mac[i+3]` because `i` is in the range of [0, 15] and `mac` has the
