@@ -113,7 +113,7 @@ func NewToken(uri string) (*Token, error) {
 		t.digits = digits
 	}
 
-	// Process period
+	// Process period [OPTIONAL]
 	if u.Query().Has("period") {
 		rawPeriod := u.Query().Get("period")
 		period, err := strconv.Atoi(rawPeriod)
