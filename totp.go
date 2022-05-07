@@ -161,7 +161,7 @@ func (t *Token) Issuer() string {
 }
 
 // Algorithm returns the hash function name used to generate TOTPs.
-// It should return "SHA1", "SHA256", or "ShA512".
+// It should return "SHA1", "SHA256", or "SHA512".
 func (t *Token) Algorithm() string {
 	return t.algorithm.name
 }
