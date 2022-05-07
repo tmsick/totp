@@ -65,7 +65,8 @@ func NewToken(uri string) (*Token, error) {
 	}
 
 	// Process label
-	t.label = u.EscapedPath()
+	// `u.Path` might contain preceding or trailing slashes.
+	t.label = strings.Trim(u.Path, "/")
 
 	// Process secret [REQUIRED]
 	if u.Query().Has("secret") {
